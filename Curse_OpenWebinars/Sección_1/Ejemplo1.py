@@ -9,7 +9,6 @@ learning_rate = 0.001
 training_epochs = 600
 display_step = 50
 
-
 # Placeholders del grafo
 X = tf.placeholder(tf.float32)
 x = 5.0
