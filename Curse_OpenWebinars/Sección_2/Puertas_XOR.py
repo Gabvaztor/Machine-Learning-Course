@@ -34,8 +34,6 @@ y2_ = []
 y3_ = []
 costs = []
 
-repetir = 1
-
 # Puede ocurrir que el descenso del gradiente quede en un mínimo local disminuyendo una o dos de las variables
 # y dejando las otras igual. Ese es un problema relativo al valor inicial de los pesos y de los biases (por ser random)
 # Para solucionarlo deberíamos elegir un valor concreto para las variables que encamine al aprendizaje.
