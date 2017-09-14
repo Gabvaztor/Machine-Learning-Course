@@ -1,5 +1,5 @@
 import tensorflow as tf
-from Curse_OpenWebinars.UsefulTools.TensorFlowUtils import initialize_session
+from Course_OpenWebinars.UsefulTools.TensorFlowUtils import initialize_session
 import matplotlib.pyplot as plt
 import time
 

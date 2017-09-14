@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy
 import matplotlib.pyplot as plt
-from Curse_OpenWebinars.UsefulTools.TensorFlowUtils import *
+from Course_OpenWebinars.UsefulTools.TensorFlowUtils import *
 rng = numpy.random
 
 # Parameters
