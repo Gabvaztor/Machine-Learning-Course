@@ -69,7 +69,7 @@ class Modelo():
         self.input_columns_numbers = 60
         self.kernel_size = [7, 7]  # Kernel patch size
         self.epoch_numbers = 100 # Epochs number
-        self.batch_size = 8  # Batch size
+        self.batch_size = 16  # Batch size
         self.input_size = len(input)  # Change if necessary
         self.test_size = len(test)  # Change if necessary
         self.train_dropout = 0.5  # Keep probably to dropout to avoid overfitting
