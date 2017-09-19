@@ -69,15 +69,15 @@ class Modelo():
         self.input_columns_numbers = 60
         self.kernel_size = [7, 7]  # Kernel patch size
         self.epoch_numbers = 100 # Epochs number
-        self.batch_size = 64  # Batch size
+        self.batch_size = 32  # Batch size
         self.input_size = len(input)  # Change if necessary
         self.test_size = len(test)  # Change if necessary
         self.train_dropout = 0.5  # Keep probably to dropout to avoid overfitting
-        self.first_label_neurons = 25
+        self.first_label_neurons = 16
         self.second_label_neurons = 32
         self.third_label_neurons = 64
         self.learning_rate = 1e-3  # Learning rate
-        self.number_epoch_to_change_learning_rate = 15
+        self.number_epoch_to_change_learning_rate = 2
         self.trains = int(self.input_size / self.batch_size) + 1 # Total number of trains for epoch
         # INFORMATION VARIABLES
         self.index_buffer_data = 0  # The index for mini_batches during training
@@ -104,6 +104,8 @@ class Modelo():
         x_input, y_labels, keep_probably = self.placeholders(args=None, kwargs=None)
         # Reshape x placeholder into a specific tensor
         x_reshape = tf.reshape(x_input, [-1, self.input_rows_numbers, self.input_columns_numbers, 1])
+        shape = tf.shape(x_reshape)
+        pt("shape", shape)
         # Network structure
         y_prediction = self.network_structure(x_reshape, args=None, keep_probably=keep_probably)
         cross_entropy, train_step, correct_prediction, accuracy = self.model_evaluation(y_labels=y_labels,
@@ -180,7 +182,8 @@ class Modelo():
         :return: Inputs, labels and others placeholders
         """
         # Placeholders
-        x = tf.placeholder(tf.float32, shape=[None, self.input_rows_numbers * self.input_columns_numbers])  # All images will be 60x60
+        #x = tf.placeholder(tf.float32, shape=[None, self.input_rows_numbers * self.input_columns_numbers])  # All images will be 60x60
+        x = tf.placeholder(tf.float32, shape=[None, 60, 60, 3])  # All images will be 60x60*3
         y_ = tf.placeholder(tf.float32, shape=[None, self.number_of_classes])  # Number of labels
         keep_probably = tf.placeholder(tf.float32)  # Value of dropout. With this you can set a value for each data set
         return x, y_, keep_probably
@@ -197,47 +200,51 @@ class Modelo():
             inputs=input,
             filters=self.first_label_neurons,
             kernel_size=self.kernel_size,
-            padding="same",
-            activation=tf.nn.relu)
+            padding="same")
         # Second Convolutional Layer
+        """
         convolution_2 = tf.layers.conv2d(
             inputs=convolution_1,
             filters=self.first_label_neurons,
             kernel_size=self.kernel_size,
             padding="same",
             activation=tf.nn.relu)
+        """
         # Pool Layer 1 and reshape images by 2
-        pool1 = tf.layers.max_pooling2d(inputs=convolution_2, pool_size=[2, 2], strides=2)
+        pool1 = tf.layers.max_pooling2d(inputs=convolution_1, pool_size=[2, 2], strides=2)
         dropout1 = tf.nn.dropout(pool1, keep_dropout)
         convolution_3 = tf.layers.conv2d(
             inputs=dropout1,
             filters=self.second_label_neurons,
-            kernel_size=[5,5],
-            padding="same",
-            activation=tf.nn.relu)
+            kernel_size=[4,4],
+            padding="same")
+        """
         convolution_4 = tf.layers.conv2d(
             inputs=convolution_3,
             filters=self.second_label_neurons,
             kernel_size=[5,5],
             padding="same",
             activation=tf.nn.relu)
+        """
         # # Pool Layer 2 nd reshape images by 2
-        pool2 = tf.layers.max_pooling2d(inputs=convolution_4, pool_size=[2, 2], strides=2)
+        pool2 = tf.layers.max_pooling2d(inputs=convolution_3, pool_size=[2, 2], strides=2)
         dropout2 = tf.nn.dropout(pool2, keep_dropout)
+        """
         convolution_5 = tf.layers.conv2d(
             inputs=dropout2,
             filters=self.third_label_neurons,
             kernel_size=[3,3],
             padding="same")
+        """
         convolution_6 = tf.layers.conv2d(
-            inputs=convolution_5,
+            inputs=dropout2,
             filters=self.third_label_neurons,
-            kernel_size=[3,3],
+            kernel_size=[2,2],
             padding="same")
         dropout3 = tf.nn.dropout(convolution_6, keep_dropout)
         # Dense Layer
-        pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)
-                                        * self.third_label_neurons])
+        pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons * 3])
+        #pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons])
         dense = tf.layers.dense(inputs=pool2_flat, units=self.third_label_neurons, activation=tf.nn.relu)
         dropout4 = tf.nn.dropout(dense, keep_dropout)
         # Readout Layer
@@ -259,8 +266,8 @@ class Modelo():
                                                     logits=y_prediction))  # Cross entropy between y_ and y_conv
 
         #train_step = tf.train.AdadeltaOptimizer(self.learning_rate).minimize(cross_entropy)  # Adadelta Optimizer
-        #train_step = tf.train.AdamOptimizer(self.learning_rate).minimize(cross_entropy)  # Adam Optimizer
-        train_step = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cross_entropy)  # Adam Optimizer
+        train_step = tf.train.AdamOptimizer(self.learning_rate).minimize(cross_entropy)  # Adam Optimizer
+        #train_step = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cross_entropy)  # Adam Optimizer
 
         # Sure is axis = 1
         correct_prediction = tf.equal(tf.argmax(y_prediction, axis=1),
@@ -368,6 +375,7 @@ class Modelo():
         # new epoch
         # START  TRAINING
         parar_entrenamiento = False
+
         for epoch in range(self.num_epochs_count, self.epoch_numbers):  # Start with load value or 0
             if parar_entrenamiento:
                 break
@@ -396,10 +404,10 @@ class Modelo():
                     pt('train_accuracy', self.train_accuracy)
                     pt('cross_entropy_train', cross_entropy_train)
                     pt('test_accuracy', self.test_accuracy)
-                    pt('self.index_buffer_data', self.index_buffer_data)
+                    pt('index_buffer_data', self.index_buffer_data)
                 # To decrement learning rate during training
-                if epoch % 6 == 0 and num_train == 9 and epoch != 0:
-                    self.learning_rate = float(self.learning_rate / 2.0)
+                if epoch % self.number_epoch_to_change_learning_rate == 0 and num_train == 9 and epoch != 0:
+                    self.learning_rate = float(self.learning_rate / 1.5)
                 # Update indexes
                 # Update num_epochs_counts
                 if num_train +1 == self.trains:  # +1 because start in 0
@@ -420,7 +428,7 @@ class Modelo():
                         pass
                 # Update batches values
                 self.update_batch()
-        pt('END TRAINING ')
+        pt('FIN DEL ENTRENAMIENTO')
         self.show_save_statistics(accuracies_train=accuracies_train, accuracies_test=accuracies_test,
                              loss_train=loss_train, loss_test=loss_test)
         self.make_predictions()
@@ -475,26 +483,30 @@ def process_image_signals_problem(image, image_type, height, width, is_test=Fals
     # 2- Modify intensity and contrast
     # 3- Transform to gray scale
     # 4- Return image
-    image = cv2.imread(image, image_type)
+    image = cv2.imread(image, 1)
     image = cv2.resize(image, (height, width))
+    """
     try:
         image = cv2.equalizeHist(image)
         image = cv2.equalizeHist(image)
         image = cv2.equalizeHist(image)
     except:
         pass
-    #if not is_test:
+    """
+    image = cv2.normalize(image, image, 0, 255, cv2.NORM_MINMAX)
+    image = cv2.normalize(image, image, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+    if not is_test:
 
-    random_percentage = random.randint(3, 20)
-    to_crop_height = int((random_percentage * height) / 100)
-    to_crop_width = int((random_percentage * width) / 100)
-    image = image[to_crop_height:height - to_crop_height, to_crop_width:width - to_crop_width]
-    image = cv2.copyMakeBorder(image, top=to_crop_height,
-                               bottom=to_crop_height,
-                               left=to_crop_width,
-                               right=to_crop_width,
-                               borderType=cv2.BORDER_CONSTANT)
-    image = image.reshape(-1)
+        random_percentage = random.randint(3, 20)
+        to_crop_height = int((random_percentage * height) / 100)
+        to_crop_width = int((random_percentage * width) / 100)
+        image = image[to_crop_height:height - to_crop_height, to_crop_width:width - to_crop_width]
+        image = cv2.copyMakeBorder(image, top=to_crop_height,
+                                   bottom=to_crop_height,
+                                   left=to_crop_width,
+                                   right=to_crop_width,
+                                   borderType=cv2.BORDER_CONSTANT)
+    #image = image.reshape(-1)
     #cv2.imshow('image', image)
     #cv2.waitKey(0)  # Wait until press key to destroy image
     return image

@@ -12,7 +12,7 @@ Author: @gabvaztor
 import Course_OpenWebinars.Sección_5_Problema_Señales.Modelo_Convolucional as modelo
 import Course_OpenWebinars.Sección_5_Problema_Señales.Buscador as buscador
 from Course_OpenWebinars.UsefulTools.TensorFlowUtils import pt
-
+import tensorflow as tf
 # --------------------------------------------------------------------------
 # --------------------------------------------------------------------------
 # ---- READING DATA ----
@@ -47,7 +47,8 @@ models = modelo.Modelo(input=train_set[0],test=test_set[0],
                          input_labels=train_set[1],test_labels=test_set[1],
                          number_of_classes=numero_clases,
                          option_problem=option_problem)
-models.convolucion_imagenes()
+with tf.device('/gpu:0'):
+    models.convolucion_imagenes()
 
 
 
