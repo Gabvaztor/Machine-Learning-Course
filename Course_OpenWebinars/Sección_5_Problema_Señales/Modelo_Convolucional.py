@@ -202,42 +202,42 @@ class Modelo():
             kernel_size=self.kernel_size,
             padding="same")
         # Second Convolutional Layer
-        """
+
         convolution_2 = tf.layers.conv2d(
             inputs=convolution_1,
             filters=self.first_label_neurons,
             kernel_size=self.kernel_size,
             padding="same",
             activation=tf.nn.relu)
-        """
+
         # Pool Layer 1 and reshape images by 2
-        pool1 = tf.layers.max_pooling2d(inputs=convolution_1, pool_size=[2, 2], strides=2)
+        pool1 = tf.layers.max_pooling2d(inputs=convolution_2, pool_size=[2, 2], strides=2)
         dropout1 = tf.nn.dropout(pool1, keep_dropout)
         convolution_3 = tf.layers.conv2d(
             inputs=dropout1,
             filters=self.second_label_neurons,
             kernel_size=[4,4],
             padding="same")
-        """
+
         convolution_4 = tf.layers.conv2d(
             inputs=convolution_3,
             filters=self.second_label_neurons,
             kernel_size=[5,5],
             padding="same",
             activation=tf.nn.relu)
-        """
+
         # # Pool Layer 2 nd reshape images by 2
-        pool2 = tf.layers.max_pooling2d(inputs=convolution_3, pool_size=[2, 2], strides=2)
+        pool2 = tf.layers.max_pooling2d(inputs=convolution_4, pool_size=[2, 2], strides=2)
         dropout2 = tf.nn.dropout(pool2, keep_dropout)
-        """
+
         convolution_5 = tf.layers.conv2d(
             inputs=dropout2,
             filters=self.third_label_neurons,
             kernel_size=[3,3],
             padding="same")
-        """
+
         convolution_6 = tf.layers.conv2d(
-            inputs=dropout2,
+            inputs=convolution_5,
             filters=self.third_label_neurons,
             kernel_size=[2,2],
             padding="same")
@@ -245,12 +245,12 @@ class Modelo():
         # Dense Layer
         pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons * 3])
         #pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons])
-        dense = tf.layers.dense(inputs=pool2_flat, units=self.third_label_neurons, activation=tf.nn.relu)
+        dense = tf.layers.dense(inputs=pool2_flat, units=1024)
         dropout4 = tf.nn.dropout(dense, keep_dropout)
         # Readout Layer
-        w_fc2 = weight_variable([self.third_label_neurons, self.number_of_classes])
+        w_fc2 = weight_variable([1024, self.number_of_classes])
         b_fc2 = bias_variable([self.number_of_classes])
-        y_convolution = (tf.matmul(dropout4, w_fc2) + b_fc2)
+        y_convolution = tf.matmul(dropout4, w_fc2) + b_fc2
         return y_convolution
 
     def model_evaluation(self, y_labels, y_prediction, *args, **kwargs):
