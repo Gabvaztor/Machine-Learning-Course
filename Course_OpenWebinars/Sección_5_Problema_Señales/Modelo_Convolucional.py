@@ -1,6 +1,5 @@
 """
 Author: @gabvaztor
-StartDate: 04/03/2017
 
 Style: "Google Python Style Guide" 
 https://google.github.io/styleguide/pyguide.html
@@ -49,10 +48,7 @@ import random
 import time
 
 class Modelo():
-    def __init__(self,input, test, input_labels, test_labels, number_of_classes,
-                 option_problem=None, validation=None, validation_labels=None):
-        # NOTE: IF YOU LOAD_MODEL_CONFIGURATION AND CHANGE SOME TENSORFLOW ATTRIBUTE AS NEURONS, THE TRAIN ACCURACY
-        # WILL START AGAIN
+    def __init__(self,input, test, input_labels, test_labels, number_of_classes, option_problem=None):
         self.input = input
         self.test = test
         self.input_labels = input_labels
@@ -97,6 +93,7 @@ class Modelo():
         # noinspection PyUnresolvedReferences
         self.options = [option_problem, cv2.IMREAD_GRAYSCALE,
                    self.input_rows_numbers, self.input_columns_numbers]
+
     def convolucion_imagenes(self):
         """
         Generic convolutional model
@@ -368,7 +365,6 @@ class Modelo():
         num_train_start = int(self.num_trains_count % self.trains)
         if num_train_start == self.trains:
             num_train_start = 0
-        epoch_contador = 2
         # new epoch
         # START  TRAINING
         parar_entrenamiento = False
@@ -401,15 +397,13 @@ class Modelo():
                     pt('cross_entropy_train', cross_entropy_train)
                     pt('test_accuracy', self.test_accuracy)
                     pt('self.index_buffer_data', self.index_buffer_data)
-
+                # To decrement learning rate during training
+                if epoch % 6 == 0 and num_train == 9 and epoch != 0:
+                    self.learning_rate = float(self.learning_rate / 2.0)
                 # Update indexes
                 # Update num_epochs_counts
                 if num_train +1 == self.trains:  # +1 because start in 0
                     self.num_epochs_count += 1
-                # To decrement learning rate during training
-                if self.num_epochs_count % self.number_epoch_to_change_learning_rate == 0 \
-                        and self.num_epochs_count != 1 and self.index_buffer_data == 0:
-                    self.learning_rate = float(self.learning_rate / 10.)
 
                 if self.show_advanced_info:
                     self.show_advanced_information(y_labels=y_labels, y_prediction=y_prediction,
@@ -421,11 +415,9 @@ class Modelo():
                     respuesta = str(input("¿Paramos entrenamiento?: Pulsa 'S' para sí y 'N' para no." + " ")).upper()
                     if respuesta == "S": # Paramos entrenamiento
                         parar_entrenamiento = True
-                        epoch_contador = epoch_contador + 2
                         break
                     elif respuesta != "N":
-                        epoch_contador = epoch_contador + 2
-
+                        pass
                 # Update batches values
                 self.update_batch()
         pt('END TRAINING ')
