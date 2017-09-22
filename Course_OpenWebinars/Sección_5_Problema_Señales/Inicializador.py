@@ -13,11 +13,6 @@ import Course_OpenWebinars.Sección_5_Problema_Señales.Modelo_Convolucional as 
 import Course_OpenWebinars.Sección_5_Problema_Señales.Buscador as buscador
 from Course_OpenWebinars.UsefulTools.TensorFlowUtils import pt
 import tensorflow as tf
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-# ---- READING DATA ----
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
 
 """
 Ubicaciones
