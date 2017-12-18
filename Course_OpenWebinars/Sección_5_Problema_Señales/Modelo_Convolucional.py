@@ -103,11 +103,11 @@ class Modelo():
         # Placeholders
         x_input, y_labels, keep_probably = self.placeholders(args=None, kwargs=None)
         # Reshape x placeholder into a specific tensor
-        x_reshape = tf.reshape(x_input, [-1, self.input_rows_numbers, self.input_columns_numbers, 1])
-        shape = tf.shape(x_reshape)
+        #x_reshape = tf.reshape(x_input, [-1, self.input_rows_numbers, self.input_columns_numbers, 3])
+        shape = tf.shape(x_input)
         pt("shape", shape)
         # Network structure
-        y_prediction = self.network_structure(x_reshape, args=None, keep_probably=keep_probably)
+        y_prediction = self.network_structure(x_input, args=None, keep_probably=keep_probably)
         cross_entropy, train_step, correct_prediction, accuracy = self.model_evaluation(y_labels=y_labels,
                                                                                         y_prediction=y_prediction)
         # Session
@@ -225,7 +225,7 @@ class Modelo():
 
         dropout3 = tf.nn.dropout(convolution_3, keep_dropout)
         # Dense Layer
-        pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons * 3])
+        pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons])
         #pool2_flat = tf.reshape(dropout3, [-1, int(self.input_rows_numbers / 4) * int(self.input_columns_numbers / 4)* self.third_label_neurons])
         dense = tf.layers.dense(inputs=pool2_flat, units=1024)
         dropout4 = tf.nn.dropout(dense, keep_dropout)
